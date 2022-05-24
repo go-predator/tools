@@ -3,10 +3,12 @@
  * @Email:     thepoy@163.com
  * @File Name: string.go
  * @Created:   2021-11-24 19:58:22
- * @Modified:  2021-11-24 19:58:34
+ * @Modified:  2022-05-24 10:15:27
  */
 
 package tools
+
+import "strings"
 
 // Trim 删除目标字符串两侧的无用字符
 func Trim(s_ string, chars_ string) string {
@@ -43,4 +45,25 @@ func Trim(s_ string, chars_ string) string {
 // Trim 删除两则空白字符，包插空格、换行、制表、全角空格
 func Strip(src string) string {
 	return Trim(src, " \n\t 　")
+}
+
+// ReplaceInvalidSpaces 替换html页面中各种奇葩的空白符为空格
+func ReplaceInvalidSpaces(src string) string {
+	src = strings.ReplaceAll(src, " ", " ")
+	src = strings.ReplaceAll(src, "　", " ")
+
+	return src
+}
+
+// RemoveInvalidChars 删除单句中的无效字符，如一些无意义的特殊字符
+func RemoveInvalidChars(src string, chars ...string) string {
+	if len(chars) == 0 {
+		return src
+	}
+
+	for _, char := range chars {
+		src = strings.ReplaceAll(src, char, "")
+	}
+
+	return ReplaceInvalidSpaces(src)
 }
