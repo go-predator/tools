@@ -1,9 +1,10 @@
-/*
- * @Author:    thepoy
- * @Email:     thepoy@163.com
- * @File Name: string.go
- * @Created:   2021-11-24 19:58:22
- * @Modified:  2022-05-24 10:15:27
+/**
+ * @Author:      thepoy
+ * @Email:       thepoy@163.com
+ * @File Name:   string.go
+ * @Created At:  2021-11-24 19:58:22
+ * @Modified At: 2023-03-16 18:35:12
+ * @Modified By: thepoy
  */
 
 package tools
@@ -11,35 +12,8 @@ package tools
 import "strings"
 
 // Trim 删除目标字符串两侧的无用字符
-func Trim(s_ string, chars_ string) string {
-	s, chars := []rune(s_), []rune(chars_)
-	length := len(s)
-	max := len(s) - 1
-	l, r := true, true //标记当左端或者右端找到正常字符后就停止继续寻找
-	start, end := 0, max
-	tmpEnd := 0
-	charset := make(map[rune]bool) //创建字符集&#xff0c;也就是唯一的字符&#xff0c;方便后面判断是否存在
-	for i := 0; i < len(chars); i++ {
-		charset[chars[i]] = true
-	}
-	for i := 0; i < length; i++ {
-		if _, exist := charset[s[i]]; l && !exist {
-			start = i
-			l = false
-		}
-		tmpEnd = max - i
-		if _, exist := charset[s[tmpEnd]]; r && !exist {
-			end = tmpEnd
-			r = false
-		}
-		if !l && !r {
-			break
-		}
-	}
-	if l && r { // 如果左端和右端都没找到正常字符&#xff0c;那么表示该字符串没有正常字符
-		return ""
-	}
-	return string(s[start : end+1])
+func Trim(s string, chars string) string {
+	return strings.Trim(s, chars)
 }
 
 // Trim 删除两则空白字符，包插空格、换行、制表、全角空格
@@ -49,21 +23,49 @@ func Strip(src string) string {
 
 // ReplaceInvalidSpaces 替换html页面中各种奇葩的空白符为空格
 func ReplaceInvalidSpaces(src string) string {
-	src = strings.ReplaceAll(src, " ", " ")
-	src = strings.ReplaceAll(src, "　", " ")
+	// A map to store the invalid spaces
+	invalidSpaces := map[string]bool{
+		"\u00A0": true, // no-break space
+		"\u2002": true, // en space
+		"\u2003": true, // em space
+		"\u2009": true, // thin space
+		"\u3000": true, // thin space
+	}
 
-	return src
+	// A variable to store the replaced string
+	replacedString := ""
+
+	// Loop through each character of the html and check if it is an invalid space
+	for _, c := range src {
+		if invalidSpaces[string(c)] {
+			replacedString += " " // replace with a normal space
+		} else {
+			replacedString += string(c) // keep the original character
+		}
+	}
+
+	return replacedString
+
 }
 
-// RemoveInvalidChars 删除单句中的无效字符，如一些无意义的特殊字符
-func RemoveInvalidChars(src string, chars ...string) string {
-	if len(chars) == 0 {
-		return src
+// RemoveInvalidRunes 删除单句中的无效字符，如一些无意义的特殊字符
+func RemoveInvalidRunes(src string, runes ...rune) string {
+	var builder strings.Builder
+
+	for _, r := range src {
+		if !containsRune(r, runes...) {
+			builder.WriteRune(r)
+		}
 	}
 
-	for _, char := range chars {
-		src = strings.ReplaceAll(src, char, "")
-	}
+	return builder.String()
+}
 
-	return ReplaceInvalidSpaces(src)
+func containsRune(r rune, runes ...rune) bool {
+	for _, v := range runes {
+		if v == r {
+			return true
+		}
+	}
+	return false
 }
